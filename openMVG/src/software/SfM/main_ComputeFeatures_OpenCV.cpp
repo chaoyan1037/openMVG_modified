@@ -134,7 +134,6 @@ public:
 #include <cereal/archives/json.hpp>
 CEREAL_REGISTER_TYPE_WITH_NAME(BRISK_OPENCV_Image_describer, "BRISK_OPENCV_Image_describer");
 
-#ifdef USE_OCVSIFT
 ///
 //- Create an Image_describer interface that use and OpenCV extraction method
 // i.e. with the SIFT detector+descriptor
@@ -219,7 +218,7 @@ private:
   int _i;
 };
 CEREAL_REGISTER_TYPE_WITH_NAME(SIFT_OPENCV_Image_describer, "SIFT_OPENCV_Image_describer");
-#endif //USE_OCVSIFT
+
 
 /// Compute between the Views
 /// Compute view image description (feature & descriptor extraction using OpenCV)
