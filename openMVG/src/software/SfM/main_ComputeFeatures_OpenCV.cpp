@@ -58,10 +58,10 @@ enum ePairMode
 // Reuse the existing AKAZE floating point Keypoint.
 typedef features::AKAZE_Binary_Regions BRISK_OpenCV_Regions;
 // Define the Interface
-class BRISK_OCV_Image_describer : public Image_describer
+class BRISK_OPENCV_Image_describer : public Image_describer
 {
 public:
-	BRISK_OCV_Image_describer() :Image_describer(){}
+	BRISK_OPENCV_Image_describer() :Image_describer(){}
 
 
   bool Set_configuration_preset(EDESCRIBER_PRESET preset)
@@ -121,7 +121,7 @@ public:
   /// Allocate Regions type depending of the Image_describer
   void Allocate(std::unique_ptr<Regions> &regions) const
   {
-    regions.reset( new AKAZE_OpenCV_Regions );
+	  regions.reset(new BRISK_OpenCV_Regions);
   }
 
   template<class Archive>
@@ -132,7 +132,7 @@ public:
 #include <cereal/cereal.hpp>
 #include <cereal/types/polymorphic.hpp>
 #include <cereal/archives/json.hpp>
-CEREAL_REGISTER_TYPE_WITH_NAME(AKAZE_OCV_Image_describer, "AKAZE_OCV_Image_describer");
+CEREAL_REGISTER_TYPE_WITH_NAME(BRISK_OPENCV_Image_describer, "BRISK_OPENCV_Image_describer");
 
 #ifdef USE_OCVSIFT
 ///
@@ -233,18 +233,15 @@ int main(int argc, char **argv)
   std::string sSfM_Data_Filename;
   std::string sOutDir = "";
   bool bForce = false;
-#ifdef USE_OCVSIFT
-  std::string sImage_Describer_Method = "AKAZE_OPENCV";
-#endif
+  std::string sImage_Describer_Method = "SIFT_OPENCV";
 
   // required
   cmd.add( make_option('i', sSfM_Data_Filename, "input_file") );
   cmd.add( make_option('o', sOutDir, "outdir") );
   // Optional
   cmd.add( make_option('f', bForce, "force") );
-#ifdef USE_OCVSIFT
   cmd.add( make_option('m', sImage_Describer_Method, "describerMethod") );
-#endif
+
 
   try {
       if (argc == 1) throw std::string("Invalid command line parameter.");
@@ -255,12 +252,10 @@ int main(int argc, char **argv)
       << "[-o|--outdir] path \n"
       << "\n[Optional]\n"
       << "[-f|--force: Force to recompute data]\n"
-#ifdef USE_OCVSIFT
       << "[-m|--describerMethod\n"
       << "  (method to use to describe an image):\n"
-      << "   AKAZE_OPENCV (default),\n"
-      << "   SIFT_OPENCV: SIFT FROM OPENCV,\n"
-#endif
+      << "   SIFT_OPENCV(default): SIFT FROM OPENCV,\n"
+      << "   BRISK_OPENCV: BRISK FROM OPENCV,\n"
       << std::endl;
 
       std::cerr << s << std::endl;
@@ -271,10 +266,7 @@ int main(int argc, char **argv)
             << argv[0] << std::endl
             << "--input_file " << sSfM_Data_Filename << std::endl
             << "--outdir " << sOutDir << std::endl
-#ifdef USE_OCVSIFT
-            << "--describerMethod " << sImage_Describer_Method << std::endl
-#endif
-            ;
+            << "--describerMethod " << sImage_Describer_Method << std::endl;
 
   if (sOutDir.empty())  {
     std::cerr << "\nIt is an invalid output directory" << std::endl;
@@ -321,24 +313,24 @@ int main(int argc, char **argv)
   }
   else
   {
-#ifdef USE_OCVSIFT
-    if (sImage_Describer_Method == "AKAZE_OPENCV")
+//#ifdef USE_OCVSIFT
+    if (sImage_Describer_Method == "BRISK_OPENCV")
     {
-      image_describer.reset(new AKAZE_OCV_Image_describer);
+		image_describer.reset(new BRISK_OPENCV_Image_describer);
     }
     else
     if (sImage_Describer_Method == "SIFT_OPENCV")
     {
-      image_describer.reset(new SIFT_OPENCV_Image_describer());
+      image_describer.reset(new SIFT_OPENCV_Image_describer);
     }
     else
     {
       std::cerr << "Unknown image describer method." << std::endl;
       return EXIT_FAILURE;
     }
-#else
-    image_describer.reset(new AKAZE_OCV_Image_describer);
-#endif
+//#else
+//    image_describer.reset(new AKAZE_OCV_Image_describer);
+//#endif
 
     // Export the used Image_describer and region type for:
     // - dynamic future regions computation and/or loading
